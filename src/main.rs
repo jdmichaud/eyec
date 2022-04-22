@@ -1,18 +1,13 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 extern crate serde;
 
-use std::env;
 use std::format;
 use which::which_all;
 use io::prelude::*;
 use std::fs;
-use std::io::{self, ErrorKind};
+use std::io::{self};
 use std::process::Command;
-use std::io::{BufReader, BufWriter};
+use std::io::{BufReader};
 
-use std::os::unix::process::CommandExt;
 use std::error::Error;
 use std::path::{Component, Path, PathBuf};
 use serde::{Deserialize, Serialize};
@@ -151,7 +146,7 @@ fn get_real_program_path(path: &str) -> String {
 fn analyze(program: &String, args: &Vec<String>, report: &mut Report, duration: u128) {
   if ["cc", "c++", "gcc", "g++"].iter().any(|compiler| program.contains(compiler)) {
     // Look for -c (object compilation)
-    if let Some(compile_flag_position) = args.iter().position(|a| a == "-c") {
+    if let Some(_compile_flag_position) = args.iter().position(|a| a == "-c") {
       // Gather the source files
       let sources = args.iter()
         .filter(|a| a.ends_with(".c") || a.ends_with(".cc") || a.ends_with(".cpp")
@@ -292,7 +287,8 @@ fn load_report(report_filename: &str) -> Report {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
   if should_warn() { println!("warning: your compiler executable is being wrapped by eyec."); }
 
-  let report_filename = &format!("{}/eyec-report.json", std::env::current_dir()?.to_string_lossy());
+  let report_filename = &std::env::var("EYEC_REPORT").unwrap_or(
+    format!("{}/eyec-report.json", std::env::current_dir()?.to_string_lossy()));
   let mut report = load_report(report_filename);
 
   let then = date_now();
@@ -314,7 +310,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     .write(true)
     .create(true)
     .truncate(true)
-    .open(report_filename).unwrap();
+    .open(report_filename).expect(&format!("could not open {} for writing", report_filename));
   // println!("report {:?}", report);
   serde_json::to_writer(&report_file, &report)?;
 

@@ -38,6 +38,12 @@ $ PATH=~/some/path/:$PATH make
 
 `eyec-report.json` will be created.
 
+The report could be generated in multiple folder depending on the complexity of your build. To
+merge all the result into one report, you can use the enviroment variable called `EYEC_REPORT`:
+```bash
+$ PATH=~/some/path/:$PATH EYEC_REPORT=/tmp/eyec_report.json make
+```
+
 Then use `src/graph.js` to create a `.dot` file:
 ```bash
 $ node ~/to/eyec/src/graph.js eyec-report.json | dot -Tsvg > output.svg
